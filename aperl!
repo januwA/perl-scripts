@@ -1,0 +1,39 @@
+#!/usr/bin/perl
+
+use strict;
+use utf8;
+use autodie;
+use warnings;
+use Encode qw(decode encode);
+
+# making perl template
+my $perlTmp = <<'tmp';
+
+#!/usr/bin/perl
+
+use strict;
+use utf8;
+use autodie;
+use warnings;
+use Encode qw(decode encode);
+
+print encode('utf-8', "helo 你好; \n");
+
+tmp
+
+
+# create file and write template
+# print encode('utf-8', $perlTmp . "\n");
+
+my $name = shift @ARGV;
+my $file = $name ? "$name.pl"  : "temp.pl";
+my $old_umask = umask;
+
+# 打开一个文件流[$fh],并写入
+umask 0755;
+open(my $fh, ">", $file) or die "open file error!";
+print $fh encode('utf-8', $perlTmp);
+umask $old_umask;
+
+# close
+close $fh or warn "Close failed.";
