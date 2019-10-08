@@ -1,5 +1,9 @@
 #!/usr/bin/perl
 
+# 创建一个默认模板的perl文件
+# $ aperl
+# $ aperl [filename]
+
 use strict;
 use utf8;
 use autodie;
@@ -8,7 +12,6 @@ use Encode qw(decode encode);
 
 # making perl template
 my $perlTmp = <<'tmp';
-
 #!/usr/bin/perl
 
 use strict;
@@ -21,9 +24,6 @@ print encode('utf-8', "helo 你好; \n");
 
 tmp
 
-
-# create file and write template
-# print encode('utf-8', $perlTmp . "\n");
 
 my $name = shift @ARGV;
 my $file = $name ? "$name.pl"  : "temp.pl";

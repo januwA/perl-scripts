@@ -1,0 +1,10 @@
+#!/usr/bin/perl
+
+use strict;
+use utf8;
+use autodie;
+use warnings;
+use Encode qw(decode encode);
+
+print encode('utf-8', "Ajanuw: 脚本可运行. \n");
+

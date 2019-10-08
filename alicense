@@ -1,5 +1,8 @@
 #!/usr/bin/perl
 
+# 创建一个"LICENSE"文件，使用MIT
+# $ alicense
+
 use strict;
 use utf8;
 use autodie;
