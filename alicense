@@ -9,10 +9,29 @@ use autodie;
 use warnings;
 use Encode qw(decode encode);
 use POSIX qw(strftime);
+use Getopt::Long qw(GetOptions);
 
+
+my $name = "Ajanuw";
 my $year = strftime "%Y", localtime;
+my $help;
+
+GetOptions (
+  "name=s" => \$name,
+  "year=i" => \$year,
+  "help" => \$help,
+  ) or die("Error in command line arguments\n");
+
+if(defined($help)){
+print encode 'utf-8', <<"help"; 
+ 添加一个MIT开源协议文件
+  --year    set copyright year, default [$year]
+  --name    set 版权持有人, default [$name]
+help
+}
+
 my $fileBody = <<"mit";
-Copyright $year Ajanuw
+Copyright $year $name
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
