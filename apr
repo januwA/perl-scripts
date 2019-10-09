@@ -1,0 +1,55 @@
+#!/usr/bin/perl
+
+# picture rename
+# 重命名指定目录下所有的图片文件
+
+use v5.26;
+use strict;
+use utf8;
+use autodie;
+use warnings;
+use Encode qw(decode encode);
+use Data::Dumper qw(Dumper);
+use File::Basename;
+use File::Spec::Functions qw(catfile); # join path
+
+# 更改这些后缀的image文件
+my @imageTypes = (".jpeg", ".jpg", ".png", ".gif", ".webp", ".ico");
+
+my $inpurPath = shift @ARGV || ".";
+$inpurPath =~ s/\/$//; # ./home/ => ./home
+scan_file($inpurPath);
+
+# 递归文件查找
+sub scan_file { 
+	my $rootDir = catfile(shift @_, '*');
+	$rootDir =~ s/\p{space}/\\ /g; # 避免windows上的空格文件
+	for(glob($rootDir)){ 
+		if(-d $_){
+			scan_file($_);
+		}else{
+			changeImageName($_);
+		}
+	}
+}
+
+sub changeImageName {
+	my ($name, $dir, $suffix) = fileparse($_, qr/\.[^.]*/);
+	if($suffix ~~ @imageTypes){
+		# print $_ . "\n";
+		my $newName = randomString24() . $suffix;
+		my $newFilePath =  catfile($dir, $newName);
+		rename($_, $dir . $newName);
+	}
+}
+
+# 返回长度为32的随机字符串
+sub randomString24 {
+	my $s = 'ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678';
+	my $c_len =  length($s);
+	my $rs = '';
+	for(0..24){
+		$rs .= substr($s, int(rand($c_len)), 1);
+	}
+	return $rs;
+}
