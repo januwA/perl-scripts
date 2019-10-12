@@ -15,9 +15,9 @@ use Getopt::Long qw(GetOptions);
 my $helpTemp = <<'help';
 flutetr package publish
 在发布Flutetr包时，需要设置环境变量，将使用这个脚本完成
-  -p 发布时: 增加[http_proxy]和[https_proxy],删除[PUB_HOSTED_URL]和[FLUTTER_STORAGE_BASE_URL]
-  -r 发布成功后，还原环境变量配置
-  -pp 设置[proxyPort],默认[19996]
+  --publish     增加[http_proxy]和[https_proxy],删除[PUB_HOSTED_URL]和[FLUTTER_STORAGE_BASE_URL]
+  --reset       发布成功后，还原环境变量配置
+  --proxy-port  设置[proxyPort],默认[19996]
 help
 
 my $publish;
@@ -25,8 +25,14 @@ my $reset;
 my $help;
 my $proxyPort = 19996;
 
+if(length($ARGV) == 0){
+  print encode('utf-8', $helpTemp);
+}
+
+exit;
+
 GetOptions (
-            "pp=i" => \$proxyPort,
+            "proxy-port=i" => \$proxyPort,
             "reset" => \$reset,
             "publish"   => \$publish,
             "help"   => \$help,
