@@ -25,7 +25,7 @@ my $reset;
 my $help;
 my $proxyPort = 19996;
 
-if(length($ARGV) == 0){
+if(!defined($ARGV)){
   print encode('utf-8', $helpTemp);
 }
 
