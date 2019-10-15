@@ -25,11 +25,11 @@ my $reset;
 my $help;
 my $proxyPort = 19996;
 
-if(!defined($ARGV)){
+# 如果运行脚本，一个参数都没有传入，则打印help文档
+if(!defined($ARGV[0])){
   print encode('utf-8', $helpTemp);
+  exit;
 }
-
-exit;
 
 GetOptions (
             "proxy-port=i" => \$proxyPort,
