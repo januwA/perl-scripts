@@ -1,0 +1,32 @@
+#!/usr/bin/perl
+
+# 在命令行，快速运行kotlin脚本
+# 运行完成后删除.jar文件
+
+use strict;
+use utf8;
+use autodie;
+use warnings;
+use Encode qw(decode encode);
+use File::Basename;
+use File::Spec::Functions qw(catfile); # join path
+
+my $ktFile = shift @ARGV;
+
+if(!defined($ktFile)){
+  exit;
+}
+$ktFile =~ s/\p{space}/\\ /g; # 避免windows上的空格文件
+my ($name, $dir, $suffix) = fileparse($ktFile, qr/\.[^.]*/);
+;
+
+# 只对.kt文件作出反应
+if($suffix eq '.kt'){
+  my $dPath = catfile($dir, "$name.jar");
+  system "kotlinc $ktFile -include-runtime -d $dPath";
+  system "java -jar $dPath";
+
+  # 执行完删除.jar文件
+  unlink($dPath) or die "delete $$dPath error.";
+}
+
