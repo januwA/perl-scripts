@@ -1,0 +1,77 @@
+#!/usr/bin/perl
+
+# 创建p5模板
+
+use v5.26;
+use strict;
+use utf8;
+use autodie;
+use warnings;
+use Encode qw(decode encode);
+use File::Basename;
+use File::Spec::Functions qw(catfile); # join path
+
+# 保存的文件目录
+my $saveDir = shift @ARGV;
+
+if(!defined($saveDir)){
+  exit;
+}
+
+$saveDir =~ s/\p{space}/\\ /g; # 避免windows上的空格文件
+
+# making perl template
+my $htmlTmp = <<'html';
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>RDP-line</title>
+    <style>
+      body {
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <script src="https://unpkg.com/p5@0.7.2/lib/p5.min.js"></script>
+    <script src="https://unpkg.com/p5@0.7.2/lib/addons/p5.dom.min.js"></script>
+    <script src="./sketch.js"></script>
+  </body>
+</html>
+
+html
+
+my $jsTmp = <<'js';
+function setup() {
+  createCanvas(600, 400);
+  background(0);
+}
+
+function draw() {
+
+}
+
+js
+
+if(-d $saveDir){
+  # 拼接目录和文件名
+  my $htmlPath = catfile($saveDir, 'index.html');
+  my $jsPath = catfile($saveDir, 'sketch.js');
+
+  # 创建文件，并写入内容(强制覆盖)
+  my $fh;
+  open($fh, ">", $htmlPath) or die "open file error: $htmlPath!";
+  print $fh encode('utf-8', $htmlTmp);
+
+  open($fh, ">", $jsPath) or die "open file error: $jsPath!";
+  print $fh encode('utf-8', $jsTmp);
+
+  close $fh or warn "Close failed.";
+}else{
+  die "Command line error.\n";
+}
+
+
