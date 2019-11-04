@@ -18,7 +18,6 @@ if(!defined($ktFile)){
 }
 $ktFile =~ s/\p{space}/\\ /g; # 避免windows上的空格文件
 my ($name, $dir, $suffix) = fileparse($ktFile, qr/\.[^.]*/);
-;
 
 # 只对.kt文件作出反应
 if($suffix eq '.kt'){
