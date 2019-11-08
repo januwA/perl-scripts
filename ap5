@@ -56,6 +56,11 @@ function draw() {
 
 js
 
+if(!(-e $saveDir)){
+  # 目录不存在，则创建
+  mkdir($saveDir) or die "create dir error! $!";
+}
+
 if(-d $saveDir){
   # 拼接目录和文件名
   my $htmlPath = catfile($saveDir, 'index.html');
