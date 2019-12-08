@@ -26,8 +26,6 @@ $saveDir =~ s/\p{space}/\\ /g; # 避免windows上的空格文件
 # 目录不存在，则创建
 if(!(-e $saveDir)){
   mkdir($saveDir) or die "create dir error! $!";
-  mkdir(catfile($saveDir, 'example')) or die "create dir error! $!";
-  mkdir(catfile($saveDir, 'src')) or die "create dir error! $!";
 }
 
 
@@ -156,27 +154,32 @@ data
 
 
 if(-d $saveDir){
+
+    # 创建需要的文件夹
+    mkdir(catfile($saveDir, 'example')) or die "create dir error! $!";
+    mkdir(catfile($saveDir, 'src')) or die "create dir error! $!";
+
     # 创建文件，并写入内容(强制覆盖)
     my $fh;
-    open($fh, ">", catfile($saveDir, 'package.json')) or die "创建失败!";
+    open($fh, ">", catfile($saveDir, 'package.json')) or die "创建失败! $!";
     print $fh encode('utf-8', $packageJsonF);
 
-    open($fh, ">", catfile($saveDir, 'rollup.config.js')) or die "创建失败!";
+    open($fh, ">", catfile($saveDir, 'rollup.config.js')) or die "创建失败! $!";
     print $fh encode('utf-8', $rollupConfigJsF);
 
-    open($fh, ">", catfile($saveDir, 'tsconfig.json')) or die "创建失败!";
+    open($fh, ">", catfile($saveDir, 'tsconfig.json')) or die "创建失败! $!";
     print $fh encode('utf-8', $tsconfigJsonF);
 
-    open($fh, ">", catfile($saveDir, 'README.md')) or die "创建失败!";
+    open($fh, ">", catfile($saveDir, 'README.md')) or die "创建失败! $!";
     print $fh encode('utf-8', $readmeMdF);
 
-    open($fh, ">", catfile($saveDir, '.gitignore')) or die "创建失败!";
+    open($fh, ">", catfile($saveDir, '.gitignore')) or die "创建失败! $!";
     print $fh encode('utf-8', $gitignoreF);
 
-    open($fh, ">", catfile($saveDir, 'example', 'index.html')) or die "创建失败!";
+    open($fh, ">", catfile($saveDir, 'example', 'index.html')) or die "创建失败! $!";
     print $fh encode('utf-8', $exampleF);
 
-    open($fh, ">", catfile($saveDir, 'src', 'main.ts')) or die "创建失败!";
+    open($fh, ">", catfile($saveDir, 'src', 'main.ts')) or die "创建失败! $!";
     print $fh encode('utf-8', $mainF);
 
     close $fh or warn "Close failed.";
