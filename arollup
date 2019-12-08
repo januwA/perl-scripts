@@ -1,0 +1,193 @@
+#!/usr/bin/perl
+
+# [Ajanuw]
+# 快速创建一个Rollup包
+# See also:
+# https://rollupjs.org/guide/zh/
+
+use v5.26;
+use strict;
+use utf8;
+use autodie;
+use warnings;
+use Encode qw(decode encode);
+use File::Basename;
+use File::Spec::Functions qw(catfile); # join path
+
+# 保存的文件目录
+my $saveDir = shift @ARGV;
+
+if(!defined($saveDir)){
+  exit;
+}
+
+$saveDir =~ s/\p{space}/\\ /g; # 避免windows上的空格文件
+
+# 目录不存在，则创建
+if(!(-e $saveDir)){
+  mkdir($saveDir) or die "create dir error! $!";
+  mkdir(catfile($saveDir, 'example')) or die "create dir error! $!";
+  mkdir(catfile($saveDir, 'src')) or die "create dir error! $!";
+}
+
+
+# /package.json
+my $packageJsonF = <<'data';
+{
+  "name": "you-package-name",
+  "version": "0.1.0",
+  "description": "description",
+  "main": "lib/main.js",
+  "types": "lib/main.d.ts",
+  "directories": {
+    "example": "example"
+  },
+  "scripts": {
+    "build": "rm -rf lib && tsc && rollup -c",
+    "build:ts": "rm -rf lib && tsc -w",
+    "build:web": "rollup -c --watch"
+  },
+  "keywords": [
+    "keyword1",
+    "keyword2"
+  ],
+  "author": "Ajanuw",
+  "license": "MIT",
+  "homepage": "https://github.com/januwA/ajanuw-duration",
+  "repository": "januwA/ajanuw-duration",
+  "devDependencies": {
+    "rollup-plugin-sourcemaps": "^0.4.2",
+    "rollup-plugin-typescript": "^1.0.1",
+    "tslib": "^1.10.0",
+    "typescript": "^3.7.3"
+  }
+}
+
+data
+
+# /rollup.config.js
+my $rollupConfigJsF = <<'data';
+import typescript from "rollup-plugin-typescript";
+import sourceMaps from "rollup-plugin-sourcemaps";
+
+export default {
+  input: "./src/main.ts",
+  output: {
+    file: "dist/build.js",
+    format: "umd",
+    sourcemap: true,
+    name: "YouPackageName"
+  },
+  plugins: [
+    typescript({
+      exclude: "node_modules/**",
+      typescript: require("typescript"),
+      declaration: true
+    }),
+    sourceMaps()
+  ]
+};
+
+data
+
+# /tsconfig.json
+my $tsconfigJsonF = <<'data';
+{
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "strict": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "declaration": true,
+    "rootDir": "./src",
+    "outDir": "./lib",
+    "sourceMap": true,
+    "lib": ["es6", "dom"]
+  },
+  "exclude": ["node_modules", "dist"]
+}
+
+data
+
+# /README.md
+my $readmeMdF = <<'data';
+# you package
+
+data
+
+# /.gitignore
+my $gitignoreF = <<'data';
+node_modules
+
+data
+
+# /example/index.html
+my $exampleF = <<'data';
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+  </head>
+  <body>
+    <script src="../dist/build.js"></script>
+    <script>
+      const { hello } = YouPackageName;
+      hello();
+    </script>
+  </body>
+</html>
+
+data
+
+# /src/main.ts
+my $mainF = <<'data';
+// main.ts
+
+export function hello() {
+  console.log("hello world");
+}
+
+data
+
+
+
+if(-d $saveDir){
+    # 创建文件，并写入内容(强制覆盖)
+    my $fh;
+    open($fh, ">", catfile($saveDir, 'package.json')) or die "创建失败!";
+    print $fh encode('utf-8', $packageJsonF);
+
+    open($fh, ">", catfile($saveDir, 'rollup.config.js')) or die "创建失败!";
+    print $fh encode('utf-8', $rollupConfigJsF);
+
+    open($fh, ">", catfile($saveDir, 'tsconfig.json')) or die "创建失败!";
+    print $fh encode('utf-8', $tsconfigJsonF);
+
+    open($fh, ">", catfile($saveDir, 'README.md')) or die "创建失败!";
+    print $fh encode('utf-8', $readmeMdF);
+
+    open($fh, ">", catfile($saveDir, '.gitignore')) or die "创建失败!";
+    print $fh encode('utf-8', $gitignoreF);
+
+    open($fh, ">", catfile($saveDir, 'example', 'index.html')) or die "创建失败!";
+    print $fh encode('utf-8', $exampleF);
+
+    open($fh, ">", catfile($saveDir, 'src', 'main.ts')) or die "创建失败!";
+    print $fh encode('utf-8', $mainF);
+
+    close $fh or warn "Close failed.";
+
+    say '';
+    say "\t\$ cd $saveDir";
+    say "\t\$ npm i";
+    say "\t\$ npm run build";
+    say '';
+    say 'rollup: https://rollupjs.org/guide/zh/';
+    say 'ajanuw: https://github.com/januwA';
+}else{
+  die "Command line error.\n";
+}
