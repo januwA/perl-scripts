@@ -54,12 +54,14 @@ my $packageJsonF = <<'data';
   "homepage": "https://github.com/januwA/ajanuw-duration",
   "repository": "januwA/ajanuw-duration",
   "devDependencies": {
-    "rollup-plugin-commonjs": "^10.1.0",
+    "@rollup/plugin-commonjs": "^11.0.0",
+    "@rollup/plugin-typescript": "^2.0.1",
+    "prettier": "^1.19.1",
+    "rollup": "^1.27.14",
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-sourcemaps": "^0.4.2",
-    "rollup-plugin-typescript": "^1.0.1",
     "tslib": "^1.10.0",
-    "typescript": "^3.7.3"
+    "typescript": "^3.7.4"
   }
 }
 
@@ -68,8 +70,8 @@ data
 # /rollup.config.js
 my $rollupConfigJsF = <<'data';
 import resolve from "rollup-plugin-node-resolve";
-import commonjs from "rollup-plugin-commonjs";
-import typescript from "rollup-plugin-typescript";
+import commonjs from "@rollup/plugin-commonjs";
+import typescript from "@rollup/plugin-typescript";
 import sourceMaps from "rollup-plugin-sourcemaps";
 
 export default {
