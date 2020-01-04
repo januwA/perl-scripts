@@ -48,9 +48,11 @@ if(defined($help)){
 	print encode('utf-8', $helpTemp);
 }
 
+# 发布后立即切换会taobao源
 if(defined($publish)){
 	system 'npm config set registry https://registry.npmjs.org/';
 	system 'npm publish'
+  system 'npm config set registry https://registry.npm.taobao.org/';
 }
 
 if(defined($npm)){
