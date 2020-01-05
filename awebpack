@@ -13,8 +13,26 @@ use utf8;
 use autodie;
 use warnings;
 use Term::ANSIColor;
+use File::Copy qw(move);
+use File::Basename qw(fileparse); # 解析文件路径
+use File::Spec::Functions qw(catfile); # join path
+use Encode qw(decode encode);
+use File::Path qw(remove_tree); # 递归删除目录
 
-system 'git clone https://github.com/januwA/webpack-scaffold.git';
+# 保存的文件目录
+my ($saveDir) = @ARGV;
+
+if(!defined($saveDir)){
+  exit;
+}
+
+$saveDir =~ s/\p{space}/\\ /g; # 避免windows上的空格文件
+
+system "git clone https://github.com/januwA/webpack-scaffold.git $saveDir";
+
+# 删除模板的版本控制
+my $gitDir = catfile($saveDir, '.git');
+remove_tree($gitDir);
 
 my $msg = <<'data';
 
