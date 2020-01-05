@@ -14,6 +14,7 @@ use Encode qw(decode encode);
 my $perlTmp = <<'tmp';
 #!/usr/bin/perl
 
+use v5.26;
 use strict;
 use utf8;
 use autodie;
