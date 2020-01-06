@@ -20,6 +20,7 @@ use utf8;
 use autodie;
 use warnings;
 use Encode qw(decode encode);
+use experimental 'smartmatch'; # 忽略智能匹配的错误警告
 
 print encode('utf-8', "helo 你好; \n");
 
