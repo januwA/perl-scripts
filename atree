@@ -1,32 +1,6 @@
 #!/usr/bin/perl
 
 # 递归打印目录结构
-# $ atree [dir=./] [.atree file path] [--depath=0]
-# $ atree ./
-# $ atree ./ /path/.atree
-
-# # Example
-# λ atree ./
-# |-- afpp
-# |-- akt
-# |-- alicense
-# |-- anpm
-# |-- ap5
-# |-- aperl
-# |-- apr
-# |-- arollup
-# |-- atest
-# |-- atree
-# |-- awebpack
-# |-- LICENSE
-# |-- README.md
-# |-- xxx/
-# |   |-- css/
-# |   |   |-- main.css
-# |   |-- index.html
-# |   |-- .gitxxx
-# |-- .atree
-# |-- .gitignore
 
 use v5.26;
 use strict;
@@ -43,77 +17,79 @@ use Term::ANSIColor;
 # 递归目录结构的次数， 0全部递归
 my $depath = 0;
 my $help;
+my $ignores;
 
 GetOptions (
-	"depath=i" => \$depath, 
-	"help"     => \$help
+  "depath=i" => \$depath,
+  "ignores=s" => \$ignores,
+  "help"     => \$help
 );
 
 if(defined($help)){
-	print color('green');
-	say encode('utf-8', "
-		\t\$ atree [dir=./] [.atree file path] [--depath=0]
-		\t\$ atree
-		\t\$ atree ./lib
-		\t\$ atree ./lib --depath 1
-		\tor 
-		\t\$ atree ./lib -d 1
-		");
-	exit;
+  print color('green');
+  say encode('utf-8', "
+    \t\$ atree [dir=./] [--ignores=./.atree] [--depath=0]
+    \t\$ atree
+    \t\$ atree ./lib
+    \t\$ atree ./lib --depath 1
+    \tor 
+    \t\$ atree ./lib -d 1
+    \t\$ atree -i ~/.atree -d 3
+    ");
+  exit;
 }
 
 my $dirPath = $ARGV[0] // "./";
 unless(-d -e $dirPath){
-	print color("red");
-	say encode('utf-8', "$dirPath 不是目录，或则不存在!!");
-	exit;
+  print color("red");
+  say encode('utf-8', "$dirPath 不是目录，或则不存在!!");
+  exit;
 }
 
 my $ignoresFileName = ".atree";
-my $ignoresPath = $ARGV[1] // catfile($dirPath, $ignoresFileName);
+my $ignoresPath = $ignores // catfile($dirPath, $ignoresFileName);
 
 # 默认忽视这些目录
 my @ignores = ();
 
 # 读取忽略文件
 sub readIgnores {
-	if(defined($ignoresPath) && -e $ignoresPath){
-		my $fh;
-		open $fh, "<", $ignoresPath;
-		while(<$fh>){
-			chomp;
-			next if /#/;
-			$_ =~ s/^\s+|\s+$//g;
-			push @ignores, $_;
-		}
-		close $fh;
-	}
+  if(defined($ignoresPath) && -e $ignoresPath){
+    my $fh;
+    open $fh, "<", $ignoresPath;
+    while(<$fh>){
+      chomp;
+      $_ =~ s/^\s+|\s+$//g;
+      next if /^#/;
+      push @ignores, $_;
+    }
+    close $fh;
+  }
 }
 readIgnores();
 
 sub scan {
-	state $depathCount = 0;
-	my ($dir, $dep) = @_;
-	if($dir && -d -e $dir) {
-		my @files = <$dir/* $dir/.[!.]*>;
-		for(@files){
-			# next if /\.{1,2}$/g;
-			my $p = catfile($_);
-			if(-d $p){
-				my($filename) = fileparse($p);
-				unless($filename ~~ @ignores){
-					say "$dep$filename/";
-					$depathCount++;
-					if($depath eq 0 or $depathCount lt $depath){
-						scan($p, "|   ".$dep."");
-					}
-				}
-			}else { 
-				my($filename) = fileparse($p);
-				say "$dep$filename";
-			}
-		}
-	};
+  my ($dir, $dep, $depathCount) = @_;
+  if($dir && -d -e $dir) {
+    my @files = <$dir/* $dir/.[!.]*>;
+    $depathCount++;
+    for(@files){
+      # next if /\.{1,2}$/g;
+      my $p = catfile($_);
+      if(-d $p){
+        my($filename) = fileparse($p);
+        unless($filename ~~ @ignores){
+          say "$dep$filename/";
+          if($depath eq 0 or $depathCount lt $depath){
+            scan($p, "|   ".$dep."", $depathCount);
+          }
+        }
+      }else { 
+        my($filename) = fileparse($p);
+        say "$dep$filename";
+      }
+    }
+  };
 }
 
-scan($dirPath, "|-- ");
+scan($dirPath, "|-- ", 0);
