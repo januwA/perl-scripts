@@ -1,0 +1,80 @@
+#!/usr/bin/perl
+
+# 在windows获取当前的桌面壁纸
+# See also: https://www.winhelponline.com/blog/find-current-wallpaper-file-path-windows-10/
+
+use v5.26;
+use strict;
+use utf8;
+use autodie;
+use warnings;
+use Encode qw(decode encode);
+use experimental 'smartmatch'; # 忽略智能匹配的错误警告
+use Getopt::Long qw(GetOptions);
+use File::Copy;
+use File::Spec::Functions;
+use File::Basename;
+use Term::ANSIColor;
+use Data::Dumper;
+
+# my $cmd = $ENV{COMSPEC}; 可能不存在此环境变量
+my $reg = $ENV{SYSTEMROOT} . '\System32\reg.exe'; # 通过命令行指定reg.exe的位置
+my $cmd = $ENV{SYSTEMROOT} . '\System32\cmd.exe'; # cmd.exe路径
+my $open; # 是否打开
+my $help;
+
+GetOptions(
+  "reg=s"   => \$reg, 
+  "open"    => \$open, 
+  "cmd=s"   => \$cmd,
+  "help"    => \$help
+);
+
+if(defined($help)){
+  print color('green');
+  say encode("utf-8", "
+  \$ awinwp [reg] [cmd] [open] [help]
+  --reg \t指定reg.exe路径\tdefault: %SystemRoot%\\System32\\reg.exe
+  --cmd \t指定cmd.exe路径\tdefault: %SystemRoot%\\system32\\cmd.exe
+  --open\t打开WallPaper \tdefault: false
+  ");
+  exit;
+}
+
+$reg =~ s/([\\\p{space}])/\\$1/g;
+$cmd =~ s/([\\\p{space}])/\\$1/g;
+
+# 查看reg.exe是否存在
+unless(-e $reg) {
+  print color('red');
+  say encode("utf-8", "[reg.exe]路径不存在: $reg");
+  exit;
+}
+
+# 查看cmd.exe是否存在
+if(defined($open) && !(-e $cmd)) {
+  print color('red');
+  say encode("utf-8", "[cmd.exe]路径不存在: $cmd");
+  exit;
+}
+
+# 查询注册表的命令
+# See also: https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/reg-query
+my $query = 'HKEY_CURRENT_USER\Control Panel\Desktop' =~ s/([\\\p{space}])/\\$1/gr;
+my @lines = `$reg QUERY $query //v WallPaper`;
+
+# 提取出值
+for(@lines) {
+  if(/WallPaper/){
+    s/WallPaper    REG_SZ//;
+    s/^\s+|\s+$//g;
+    if($_) {
+      say $_;
+      fileparse_set_fstype("MSWin32");
+      my($filename) = fileparse($_);
+      my $newPath = catfile("./", $filename);
+      copy($_, $newPath); # 拷贝到当前目录
+      system "$cmd /C $filename && explorer ." if(defined($open));
+    }
+  }
+}
