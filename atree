@@ -1,0 +1,93 @@
+#!/usr/bin/perl
+
+# 递归打印目录结构
+# $ atree [dir] [.atree file path]
+# $ atree ./
+# $ atree ./ /path/.atree
+# # Example
+# λ atree ./
+# |-- afpp
+# |-- akt
+# |-- alicense
+# |-- anpm
+# |-- ap5
+# |-- aperl
+# |-- apr
+# |-- arollup
+# |-- atest
+# |-- atree
+# |-- awebpack
+# |-- LICENSE
+# |-- README.md
+# |-- xxx/
+# |   |-- css/
+# |   |   |-- main.css
+# |   |-- index.html
+# |   |-- .gitxxx
+# |-- .atree
+# |-- .gitignore
+
+use v5.26;
+use strict;
+use utf8;
+use autodie;
+use warnings;
+use Encode qw(decode encode);
+use File::Spec::Functions;
+use File::Basename;
+use experimental 'smartmatch'; # 忽略智能匹配的错误警告
+
+# 保存的文件目录
+my ($dirPath, $ignoresPath) = @ARGV;
+my $ignoresFileName = ".atree";
+
+# 忽视这些目录
+my @ignores = ("node_modules", ".git");
+
+$dirPath = $dirPath // "./";
+
+unless(-d -e $dirPath){
+  print color("red");
+  say encode('utf-8', "$dirPath 不是目录，或则不存在!!");
+  exit;
+}
+
+# 读取忽略文件
+sub readIgnores {
+  my ($ignoresPath) = @_;
+  my $fh;
+  open $fh, "<", $ignoresPath;
+  while(<$fh>){
+    chomp;
+    next if /#/;
+    $_ =~ s/^\s+|\s+$//g;
+    push @ignores, $_;
+  }
+  close $fh;
+}
+
+$ignoresPath = $ignoresPath // catfile($dirPath, $ignoresFileName);
+readIgnores($ignoresPath) if(defined($ignoresPath) && -e $ignoresPath);
+
+sub scan {
+  my ($dir, $depath) = @_;
+  if($dir && -d -e $dir) {
+    my @files = <$dir/* $dir/.[!.]*>;
+    for(@files){
+      # next if /\.{1,2}$/g;
+      my $p = catfile($_);
+      if(-d $p){
+        my($filename) = fileparse($p);
+        unless($filename ~~ @ignores){
+        say "$depath$filename/";
+        scan($p, "|   ".$depath."");
+        }
+      }else { 
+        my($filename) = fileparse($p);
+        say "$depath$filename";
+      }
+    }
+  };
+}
+
+scan($dirPath, "|-- ");
