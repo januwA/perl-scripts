@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -I./
 
 # 递归打印目录结构
 
@@ -13,6 +13,7 @@ use File::Basename;
 use experimental 'smartmatch'; # 忽略智能匹配的错误警告
 use Getopt::Long qw(GetOptions);
 use Term::ANSIColor;
+use PrintHelp;
 
 # 递归目录结构的次数， 0全部递归
 my $depath = 0;
@@ -26,16 +27,30 @@ GetOptions (
 );
 
 if(defined($help)){
-  print color('green');
-  say encode('utf-8', "
-    \t\$ atree [dir=./] [--ignores=./.atree] [--depath=0]
-    \t\$ atree
-    \t\$ atree ./lib
-    \t\$ atree ./lib --depath 1
-    \tor 
-    \t\$ atree ./lib -d 1
-    \t\$ atree -i ~/.atree -d 3
-    ");
+  PrintHelp->new([
+      "atree [dir=./] [options]",
+      "atree ./lib",
+      "atree ./lib --depath 1",
+      "or",
+      "atree ./lib -d 1",
+      "atree -i ~/.atree -d 3"
+    ],
+    {
+  	ignores => {
+      msg => "无视目录配置文件路径.",
+      alias => "i",
+      default => "./atree"
+  	},
+  	depath => {
+      msg => "查询目录深度.",
+      alias => "d",
+      default => '0 无限.'
+  	},
+    help => {
+      msg => "帮助文档.",
+      alias => "h",
+    }
+  });
   exit;
 }
 
