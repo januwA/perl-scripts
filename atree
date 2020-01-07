@@ -1,4 +1,4 @@
-#!/usr/bin/perl -I./
+#!/usr/bin/perl
 
 # 递归打印目录结构
 
@@ -13,6 +13,10 @@ use File::Basename;
 use experimental 'smartmatch'; # 忽略智能匹配的错误警告
 use Getopt::Long qw(GetOptions);
 use Term::ANSIColor;
+
+use Cwd qw(abs_path);
+use lib dirname (abs_path(__FILE__));
+
 use PrintHelp;
 
 # 递归目录结构的次数， 0全部递归
