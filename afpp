@@ -11,79 +11,86 @@ use warnings;
 use Encode qw(decode encode);
 use Data::Dumper qw(Dumper);
 use Getopt::Long qw(GetOptions);
+use File::Basename;
 
-my $helpTemp = <<'help';
-flutetr package publish
-在发布Flutetr包时，需要设置环境变量，将使用这个脚本完成
-  --publish     增加[http_proxy]和[https_proxy],删除[PUB_HOSTED_URL]和[FLUTTER_STORAGE_BASE_URL]
-  --reset       发布成功后，还原环境变量配置
-  --proxy-port  设置[proxyPort],默认[19996]
-help
+use Cwd qw(abs_path);
+use lib dirname (abs_path(__FILE__));
+
+use PrintHelp;
 
 my $publish;
 my $reset;
 my $help;
+my $check;
 my $proxyPort = 19996;
 
-# 如果运行脚本，一个参数都没有传入，则打印help文档
-if(!defined($ARGV[0])){
-  print encode('utf-8', $helpTemp);
+GetOptions (
+  "proxy-port=i" => \$proxyPort,
+  "reset"        => \$reset,
+  "publish"      => \$publish,
+  "help"         => \$help,
+  "check"        => \$check,
+);
+
+if(defined($help)){
+    PrintHelp->new([
+      "afpp -h"
+    ],
+    {
+  	publish => {
+      msg => "发布包命令",
+      alias => "pub",
+  	},
+  	reset => {
+      msg => "设置china的安装包环境",
+      alias => "r",
+  	},
+    check => {
+      msg => "检查包是否有错误",
+      alias => "c",
+  	},
+    "proxy-port" => {
+      msg => "发布时设置本地代理代理端口号",
+      alias => "proxy",
+      default => 19996,
+  	},
+    help => {
+      msg => "帮助文档.",
+      alias => "h",
+    }
+  });
   exit;
 }
 
-GetOptions (
-            "proxy-port=i" => \$proxyPort,
-            "reset" => \$reset,
-            "publish"   => \$publish,
-            "help"   => \$help,
-            ) or die("Error in command line arguments\n");
-
-if(defined($help)){
-  print encode('utf-8', $helpTemp);
+if(defined($check)){
+  system 'flutter packages pub lish --dry-run';
+  exit;
 }
 
-if(defined($publish) && defined($reset)){
-  die "command line error.";
+sub resetENV {
+   delete $ENV{'http_proxy'};
+  delete $ENV{'https_proxy'};
+  $ENV{'PUB_HOSTED_URL'} = "https://pub.flutter-io.cn";
+  $ENV{'FLUTTER_STORAGE_BASE_URL'} = "https://storage.flutter-io.cn";
+}
+
+sub publishENV {
+  delete $ENV{'PUB_HOSTED_URL'};
+  delete $ENV{'FLUTTER_STORAGE_BASE_URL'};
+  $ENV{'http_proxy'} = "http://127.0.0.1:$proxyPort";
+  $ENV{'https_proxy'} = "https://127.0.0.1:$proxyPort";
 }
 
 # 发布：设置环境变量，并执行发布命令
 if(defined($publish)){
-  $ENV{'http_proxy'} = "http://127.0.0.1:$proxyPort";
-  $ENV{'https_proxy'} = "https://127.0.0.1:$proxyPort";
-
-  delete $ENV{'PUB_HOSTED_URL'};
-  delete $ENV{'FLUTTER_STORAGE_BASE_URL'};
-
-  if(
-    !(exists($ENV{'http_proxy'}) && 
-    exists($ENV{'https_proxy'}) && 
-    !exists($ENV{'PUB_HOSTED_URL'}) && 
-    !exists($ENV{'FLUTTER_STORAGE_BASE_URL'})
-    )
-   ){
-    warn encode('utf-8' , "命令出现意外情况!!\n");
-    exit;
-  }
-
+  publishENV();
   system 'flutter packages pub lish';
+  resetENV();
 }
 
 # 发布成功，重置环境变量
 if(defined($reset)){
-  $ENV{'PUB_HOSTED_URL'} = "https://pub.flutter-io.cn";
-  $ENV{'FLUTTER_STORAGE_BASE_URL'} = "https://storage.flutter-io.cn";
-
-
-  delete $ENV{'http_proxy'};
-  delete $ENV{'https_proxy'};
-
-    if(
-    !(!exists($ENV{'http_proxy'}) && 
-    !exists($ENV{'https_proxy'}) && 
-    exists($ENV{'PUB_HOSTED_URL'}) && 
-    exists($ENV{'FLUTTER_STORAGE_BASE_URL'})
-    )
-   ){
-    warn encode('utf-8' , "命令出现意外情况!!\n");
-  }
+  resetENV();
 }
+
+
