@@ -14,7 +14,7 @@ use File::Spec::Functions qw(catfile); # join path
 # 保存的文件目录
 my $saveDir = shift @ARGV;
 
-if(!defined($saveDir)){
+unless(defined($saveDir)){
   exit;
 }
 
@@ -28,7 +28,7 @@ my $htmlTmp = <<'html';
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>RDP-line</title>
+    <title>p5</title>
     <style>
       body {
         margin: 0;
@@ -36,8 +36,7 @@ my $htmlTmp = <<'html';
     </style>
   </head>
   <body>
-    <script src="https://unpkg.com/p5@0.7.2/lib/p5.min.js"></script>
-    <script src="https://unpkg.com/p5@0.7.2/lib/addons/p5.dom.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.10.2/p5.min.js" ></script>
     <script src="./sketch.js"></script>
   </body>
 </html>
@@ -56,9 +55,9 @@ function draw() {
 
 js
 
-if(!(-e $saveDir)){
-  # 目录不存在，则创建
-  mkdir($saveDir) or die "create dir error! $!";
+# 目录不存在，则创建
+unless(-e $saveDir){
+  mkdir($saveDir);
 }
 
 if(-d $saveDir){
