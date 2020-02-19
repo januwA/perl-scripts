@@ -22,6 +22,7 @@ my $publish;
 my $reset;
 my $help;
 my $check;
+my $codegen;
 my $proxyPort = 19996;
 
 GetOptions (
@@ -30,6 +31,7 @@ GetOptions (
   "publish"      => \$publish,
   "help"         => \$help,
   "check"        => \$check,
+  "codegen"      => \$codegen,
 );
 
 if(defined($help)){
@@ -54,6 +56,9 @@ if(defined($help)){
       alias => "proxy",
       default => 19996,
   	},
+    "codegen" => {
+      msg => "生成*.g.dart文件",
+  	},
     help => {
       msg => "帮助文档.",
       alias => "h",
@@ -68,7 +73,7 @@ if(defined($check)){
 }
 
 sub resetENV {
-   delete $ENV{'http_proxy'};
+  delete $ENV{'http_proxy'};
   delete $ENV{'https_proxy'};
   $ENV{'PUB_HOSTED_URL'} = "https://pub.flutter-io.cn";
   $ENV{'FLUTTER_STORAGE_BASE_URL'} = "https://storage.flutter-io.cn";
@@ -93,4 +98,7 @@ if(defined($reset)){
   resetENV();
 }
 
+if(defined($codegen)){
+  system 'flutter packages pub run build_runner watch --delete-conflicting-outputs';
+}
 
