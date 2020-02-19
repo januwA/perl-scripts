@@ -75,7 +75,9 @@ sub new {
 sub getMaxLen {
    my( $self ) = @_;
    my $maxLen = 0;
-   for(keys %{$self->{options}}) {
+   my $opts = $self->{options};
+   for(keys %{$opts}) {
+      $_ .= "-$opts->{$_}{\"alias\"}, " if(defined($opts->{$_}{"alias"}));
       $maxLen = length($_) if(length($_) > $maxLen);
    }
    return $maxLen;
@@ -104,12 +106,14 @@ sub setOptions {
    my $opts = $self->{options};
    if(defined($opts)){
       my $maxLen = $self->getMaxLen();
+      say $maxLen;
       $help .= "Options:\n";
       for(keys %{$opts}) {
         my $keyLen = length($_);
         $help .= "  ";
         $help .= "-$opts->{$_}{\"alias\"}, " if(defined($opts->{$_}{"alias"}));
         $help .= "--$_";
+        $help .= "  " unless(defined($opts->{$_}{"alias"}));
         $help .= " " x ($maxLen - $keyLen) if($keyLen < $maxLen);
         $help .= "\t$opts->{$_}{\"msg\"}" if(defined($opts->{$_}{"msg"}));
         $help .= " (default: $opts->{$_}{\"default\"})" if(defined($opts->{$_}{"default"}));
