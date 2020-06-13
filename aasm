@@ -10,6 +10,34 @@ use warnings;
 use Encode qw(decode encode);
 use File::Basename;
 use File::Spec::Functions qw(catfile); # join path
+use Getopt::Long qw(GetOptions);
+
+use Cwd qw(abs_path);
+use lib dirname (abs_path(__FILE__));
+use PrintHelp;
+
+my $w;
+my $help;
+
+GetOptions (
+  "w"            => \$w,
+  "help"         => \$help,
+);
+if(defined($help)){
+    PrintHelp->new([
+      "afpp -h"
+    ],
+    {
+  	w => {
+      msg => "MASM 汇编"
+  	},
+    help => {
+      msg => "帮助文档.",
+      alias => "h",
+    }
+  });
+  exit;
+}
 
 my $source = shift @ARGV;
 
@@ -22,16 +50,24 @@ $source =~ s/\p{space}/\\ /g; # 避免windows上的空格文件
 my ($name, $dir, $suffix) = fileparse($source, qr/\.[^.]*/);
 
 if($suffix eq '.asm'){
-  my $command1  = "nasm -f elf64 -o $name.o $source";
-  my $command2  = "ld $name.o -o $name";
-  my $command3  = "./$name";
+  if(defined($w)){
+    my $command1  = "ml -c -coff $name.asm";
+    my $command2  = "/d/masm32/bin/link.exe -subsystem:windows $name.obj";
+    my $command3  = "./$name.exe";
 
-  system $command1;
-  system $command2;
-  system $command3;
+    system "$command1 && $command2 && $command3";
+  } else {
+    my $command1  = "nasm -f elf64 -o $name.o $source";
+    my $command2  = "ld $name.o -o $name";
+    my $command3  = "./$name";
 
-  # 执行后删除文件
-  # unlink("./$name");
-  # unlink("./$name.o");
+    system $command1;
+    system $command2;
+    system $command3;
+
+    # 执行后删除文件
+    # unlink("./$name");
+    # unlink("./$name.o");
+  }
 }
 
