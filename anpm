@@ -3,6 +3,7 @@
 # 快速启动一些npm脚本
 # λ anpm -h
 
+use v5.10;
 use strict;
 use utf8;
 use autodie;
@@ -26,6 +27,7 @@ my $npm;
 my $help;
 my $update;
 my $registry;
+my $global;
 
 # 如果运行脚本，一个参数都没有传入，则打印help文档
 GetOptions (
@@ -35,6 +37,7 @@ GetOptions (
 	"help"   => \$help,
 	"update"   => \$update,
   "registry"  => \$registry,
+	"global" => \$global
 );
 
 if(defined($help)){
@@ -65,6 +68,10 @@ if(defined($help)){
 				msg => "查看当前源",
 				alias => "r"
       },
+      global => {
+				msg => "global -g",
+				alias => "g"
+      },
 			help => {
 				msg => "帮助文档.",
 				alias => "h",
@@ -77,7 +84,7 @@ sub show_registry {
   system 'npm config get registry';
 }
 
-# 发布后立即切换会taobao源
+# 发布后立即切换回taobao源
 if(defined($publish)){
 	system 'npm config set registry '. $registry_npm;
 	system 'npm publish';
@@ -94,7 +101,11 @@ if(defined($taobao)){
   show_registry();
 }
 
-if(defined($update)){
+if(defined($update) and defined($global)){
+	# 更新全局包
+	system 'npx npm-check-updates -g';
+} elsif(defined($update)) {
+	# 更新当前项目包
 	system 'npx npm-check-updates -u && npm i';
 }
 

@@ -23,6 +23,7 @@ use File::Path qw(remove_tree); # 递归删除目录
 my ($saveDir) = @ARGV;
 
 if(!defined($saveDir)){
+  say encode 'utf8', '必须设置保存目录.';
   exit;
 }
 
