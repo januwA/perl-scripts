@@ -106,7 +106,7 @@ sub setOptions {
    my $opts = $self->{options};
    if(defined($opts)){
       my $maxLen = $self->getMaxLen();
-      say $maxLen;
+      # say $maxLen;
       $help .= "Options:\n";
       for(keys %{$opts}) {
         my $keyLen = length($_);

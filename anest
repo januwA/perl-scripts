@@ -1,0 +1,64 @@
+#!/usr/bin/perl
+
+# https://docs.nestjs.com/cli/usages
+
+use v5.10;
+use strict;
+use utf8;
+use autodie;
+use warnings;
+use Encode qw(decode encode);
+use experimental 'smartmatch';
+use Data::Dumper qw(Dumper);
+use Getopt::Long qw(GetOptions);
+use File::Basename;
+
+use Cwd qw(abs_path);
+use lib dirname (abs_path(__FILE__));
+use PrintHelp;
+
+my $help;
+my $module;
+my $spec;
+
+GetOptions (
+	"help"         => \$help,
+	"module=s"     => \$module,
+	"spec"         => \$spec,
+);
+
+if(defined($help)){
+	PrintHelp->new([
+			"anest -h"
+		],
+		{
+			help => {
+				msg => "帮助文档.",
+				alias => "h",
+			},
+			module => {
+				msg => "同时创建module,controller,service",
+				alias => "mo",
+			},
+			spec => {
+				msg => "是否需要spec文件，默认不要",
+				alias => "spec",
+			}
+		});
+	exit;
+}
+
+# 创建模块，自动创建module,controller,service
+if(defined($module)) {
+	my $c_mo = "nest generate mo $module";
+	my $c_co = "nest generate co $module";
+	my $c_s = "nest generate s $module";
+	if (!defined($spec)) {
+		$c_mo .= ' --no-spec';
+		$c_co .= ' --no-spec';
+		$c_s .= ' --no-spec';
+	}
+	system $c_mo;
+	system $c_co;
+	system $c_s;
+}

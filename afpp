@@ -18,11 +18,12 @@ use lib dirname (abs_path(__FILE__));
 
 use PrintHelp;
 
-my $publish;
+my $publish; # publish plugin
 my $reset;
 my $help;
 my $check;
 my $codegen;
+my $build; # build apk
 my $proxyPort = 19996;
 
 GetOptions (
@@ -32,6 +33,7 @@ GetOptions (
   "help"         => \$help,
   "check"        => \$check,
   "codegen"      => \$codegen,
+  "build"        => \$build,
 );
 
 if(defined($help)){
@@ -59,6 +61,10 @@ if(defined($help)){
     "codegen" => {
       msg => "生成*.g.dart文件",
   	},
+    "build" => {
+      msg => "分包打包APK",
+      alias => "b",
+  	},
     help => {
       msg => "帮助文档.",
       alias => "h",
@@ -69,6 +75,11 @@ if(defined($help)){
 
 if(defined($check)){
   system 'flutter packages pub lish --dry-run';
+  exit;
+}
+
+if(defined($build)) {
+  system 'flutter build apk --split-per-abi';
   exit;
 }
 
