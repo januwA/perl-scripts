@@ -52,26 +52,20 @@ if(defined($help)){
 				alias => "spec",
 			},
 			build => {
-				msg => "打包生产模式",
+				msg => "build project to prod",
 				alias => "build",
 			}
 		});
 	exit;
 }
 
-# 创建模块，自动创建module,controller,service
+# create module,controller,service
 if(defined($module)) {
-	my $c_mo = "nest generate mo $module";
-	my $c_co = "nest generate co $module";
-	my $c_s = "nest generate s $module";
-	if (!defined($spec)) {
-		$c_mo .= ' --no-spec';
-		$c_co .= ' --no-spec';
-		$c_s .= ' --no-spec';
-	}
-	system $c_mo;
-	system $c_co;
-	system $c_s;
+	$spec = defined($spec) ? "--spec" : "--no-spec";
+
+	system "nest generate mo $module $spec";
+	system "nest generate co $module $spec";
+	system "nest generate s $module $spec";
 	exit;
 }
 
