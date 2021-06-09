@@ -1,0 +1,218 @@
+#!/usr/bin/perl
+
+# 创建flex和bison的模板
+# lexer.l和parser.y
+
+use v5.26;
+use strict;
+use utf8;
+use autodie;
+use warnings;
+use Encode qw(decode encode);
+use File::Basename;
+use File::Spec::Functions qw(catfile); # join path
+
+# 保存的文件目录
+my $saveDir = shift @ARGV;
+
+unless(defined($saveDir)) {
+  exit;
+}
+
+$saveDir =~ s/\p{space}/\\ /g; # 避免windows上的空格文件
+
+# making perl template
+my $flexTmp = <<'flex';
+/* win_flex.exe 2.6.4 */
+
+%option noyywrap noline
+%option prefix="yy"
+%option outfile="lexer.cpp"
+
+%{
+#include <iostream>
+#include "parser.h"
+
+xxs::location loc;
+std::string str_buf;
+
+#define YY_DECL yy::parser::symbol_type yylex()
+#define yyterminate() return yy::parser::make_YYEOF(loc)
+#define _T(t)  return xxs::parser::make_##t(loc)
+#define _IT(t) return xxs::parser::make_##t(std::stoll(yytext), loc)
+#define _FT(t) return xxs::parser::make_##t(std::stod(yytext), loc)
+#define _ST(t) return xxs::parser::make_##t(std::string(yytext, yyleng), loc)
+#define _STR   return xxs::parser::make_STRING(str_buf, loc)
+
+#define YY_USER_ACTION loc.step(); loc.columns(yyleng);
+
+%}
+
+INT     [0-9]+
+FLOAT   [0-9]*\.[0-9]+
+IDENT   (?i:[a-z][a-z0-9]*)
+
+%x cmmt mcmmt mstr
+%%
+
+"+"             { _T(PLUS);         }
+"-"             { _T(MINUS);        }
+"*"             { _T(MUL);          }
+"/"             { _T(DIV);          }
+"++"            { _T(PPLUS);        }
+"--"            { _T(MMINUS);       }
+
+"<"             { _T(LT);           }
+">"             { _T(GT);           }
+"="             { _T(EQ);           }
+"=="            { _T(EE);           }
+"<="            { _T(LTE);          }
+">="            { _T(GTE);          }
+"!="            { _T(NE);           }
+
+"("             { _T(LPAREN);       }
+")"             { _T(RPAREN);       }
+"{"             { _T(LBLOCK);       }
+"}"             { _T(RBLOCK);       }
+";"             { _T(SEMICOLON);    }
+","             { _T(COMMA);        }
+"?"             { _T(QUESTION);     }
+":"             { _T(COLON);        }
+
+
+"nil"           { _T(NIL);          }
+"function"      { _T(FUNCTION);     }
+"return"        { _T(RETURN);       }
+"if"            { _T(IF);           }
+"else"          { _T(ELSE);         }
+"for"           { _T(FOR);          }
+"while"         { _T(WHILE);        }
+"continue"      { _T(CONTINUE);     }
+"break"         { _T(BREAK);        }
+
+{INT}           { _IT(INT);         }
+{FLOAT}         { _FT(FLOAT);       }
+{IDENT}         { _ST(IDENT);       }
+
+"//"            { BEGIN(cmmt);           }
+<cmmt>.*        {                        }
+<cmmt>\n        { loc.lines(); BEGIN(0); }
+
+"/*"                   { BEGIN(mcmmt);     }
+<mcmmt>[^*\n]*         {                   }
+<mcmmt>"*"+[^*\n/]*    {                   }
+<mcmmt>\n              { loc.lines();      }
+<mcmmt>"*"+"/"         { BEGIN(0);         }
+
+`               { str_buf=""; BEGIN(mstr);     }
+<mstr>`         { BEGIN(0); _STR;              }
+%{ /* 匹配字符串内的转义字符 */ %}
+<mstr>\\n       { str_buf.push_back('\n');     }
+<mstr>\\t       { str_buf.push_back('\t');     }
+<mstr>\\r       { str_buf.push_back('\r');     }
+<mstr>\\b       { str_buf.push_back('\b');     }
+%{ /* 其它不认识的转义直接输出字符 */ %}
+<mstr>\\(.|\n)  { str_buf.push_back(yytext[1]);}
+%{ /* 其它字符 */ %}
+<mstr>[^`\\\n]+ { str_buf += yytext;            }
+<mstr>\n        { str_buf.push_back('\n');loc.lines();}
+
+
+\n              { loc.lines();      }
+[ \t\r]         {                   }
+
+. { printf("char error.\n"); }
+
+%%
+
+flex
+
+my $bisonTmp = <<'bison';
+/* bison (GNU Bison) 3.7.4 */
+
+%require "3.7"
+%skeleton "lalr1.cc"
+%language "c++"
+%output "parser.cpp"
+%defines "parser.h"
+%define api.token.constructor
+%define api.value.type variant
+%locations
+
+
+/*
+%define api.prefix {yy}
+%parse-param {}
+%lex-param {}
+*/
+
+%code requires {
+  #include <memory>
+  #include <format>
+}
+
+%code {
+  #include <iostream>
+  extern yy::parser::symbol_type yylex();
+}
+
+%token FUNCTION "function" IF "if" FOR "for" ELSE "else"  WHILE "while"
+%token CONTINUE "continue" BREAK "break" RETURN "return"
+%token NIL "null" TTRUE "true" TFALSE "false"
+%token INT "int" FLOAT "float" IDENT "identifier" STRING "string"
+%token PLUS "+" MINUS "-" MUL "*" DIV "/" PERCENT "%" PPLUS "++" MMINUS "--"
+%token LT "<" GT ">" EQ "=" EE "==" LTE "<=" GTE ">=" NE "!="
+%token LPAREN "("  RPAREN ")" LBLOCK "{" RBLOCK "}" SEMICOLON ";" COMMA "," QUESTION "?" COLON ":"
+
+%right "?"
+%right "="
+%left "==" "!="
+%left "<" ">" "<=" ">="
+%left "+" "-"
+%left "*" "/" "%"
+%right "++" "--"
+%left "("
+
+%type <int> INT
+%type <float> FLOAT
+%type <std::string> STRING IDENT
+
+%start main
+%%
+
+main:
+;
+
+%%
+
+void yy::parser::error(const location_type& loc, const std::string& msg)
+{
+  std::cout << msg << "\n";
+}
+
+bison
+
+# 目录不存在，则创建
+unless(-e $saveDir){
+  mkdir($saveDir);
+}
+
+if(-d $saveDir){
+  # 拼接目录和文件名
+  my $flexTmpPath = catfile($saveDir, 'lexer.l');
+  my $bisonTmpPath = catfile($saveDir, 'parser.y');
+
+  # 创建文件，并写入内容(强制覆盖)
+  my $fh;
+  open($fh, ">", $flexTmpPath) or die "open file error: $flexTmpPath!";
+  print $fh encode('utf-8', $flexTmp);
+
+  open($fh, ">", $bisonTmpPath) or die "open file error: $bisonTmpPath!";
+  print $fh encode('utf-8', $bisonTmp);
+
+  close $fh or warn "Close failed.";
+}else{
+  die "Command line error.\n";
+}
+
+
