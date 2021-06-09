@@ -1,0 +1,94 @@
+#!/usr/bin/perl
+
+# 快速git脚本
+# λ agit -h
+
+use v5.10;
+use strict;
+use utf8;
+use autodie;
+use warnings;
+use Encode qw(decode encode);
+use Data::Dumper qw(Dumper);
+use Getopt::Long qw(GetOptions);
+use Term::ANSIColor;
+use File::Basename;
+use Cwd qw(abs_path);
+use lib dirname (abs_path(__FILE__));
+
+use PrintHelp;
+
+my ($help, $amend, $togit, $push, $restore, $hard);
+
+GetOptions (
+	"amend" 	=> \$amend,
+	"togit" 	=> \$togit,
+	"push=s" 	=> \$push,
+	"restore" 	=> \$restore,
+	"help"		=> \$help,
+	"hard=s"	=> \$hard,
+);
+
+if(defined($help)){
+	PrintHelp->new([
+			'agit -h',
+			'agit -amend',
+			'agit -amend <message>',
+		],
+		{
+			amend => {
+				msg 	=> "修改最新的提交",
+				alias 	=> "a",
+				default => "git add . && git commit --amend --no-edit && git push -f"
+			},
+			togit => {
+				msg 	=> "把本地htps仓库转化为git仓库",
+				alias 	=> "t",
+				default => "git remote set-url origin <仓库地址>"
+			},
+			push => {
+				msg 	=> "提交到远程仓库",
+				alias 	=> "p",
+				default => 'git add . && git commit -m "<message>" && git push'
+			},
+			restore => {
+				msg 	=> "恢复工作树的修改",
+				alias 	=> "re",
+				default => 'git restore .'
+			},
+			hard => {
+				msg 	=> "修改本地仓库历史索引",
+				alias 	=> "h",
+				default => 'git reset --hard <hash>'
+			},
+		});
+	exit;
+}
+
+if(defined($amend)) {
+	if ($ARGV[0]) {
+		system "git add . && git commit --amend -m \"$ARGV[0]\" && git push -f";
+	} else {
+		system 'git add . && git commit --amend --no-edit && git push -f';
+	}
+}
+
+if(defined($togit)) {
+	system "git remote set-url origin $ARGV[0]"  if ( $ARGV[0] );
+}
+
+if(defined($push)) {
+	system "git add . && git commit -m \"$push\" && git push";
+}
+
+if(defined($restore)) {
+	if ($ARGV[0]) {
+		system "git restore $ARGV[0]";
+	} else {
+		system 'git restore .';
+	}
+}
+
+if(defined($hard)) {
+	system "git reset --hard $hard";
+}
