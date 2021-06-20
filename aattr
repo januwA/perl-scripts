@@ -1,0 +1,63 @@
+#!/usr/bin/perl
+
+# attrib.exe
+# 显示隐藏文件
+
+use v5.10;
+use strict;
+use utf8;
+use autodie;
+use warnings;
+use Encode qw(decode encode);
+use Data::Dumper qw(Dumper);
+use Getopt::Long qw(GetOptions);
+use Term::ANSIColor;
+use File::Basename;
+use Cwd qw(abs_path);
+use lib dirname (abs_path(__FILE__));
+
+use PrintHelp;
+
+my ($hide, $show, $help);
+
+GetOptions (
+	"hide" 		=> \$hide,
+	"show" 		=> \$show,
+	"help|?"	=> \$help,
+);
+
+if(defined($help)){
+	PrintHelp->new([
+			'aattr -h a.png',
+			'aattr -s a.png',
+			'aattr -h',
+		],
+		{
+			hide => {
+				msg 	=> "隐藏文件，如果没有提供文件，则隐藏当前目录下所有文件",
+				alias 	=> "h",
+			},
+			show => {
+				msg 	=> "显示文件，如果没有提供文件，则显示当前目录下所有文件",
+				alias 	=> "s",
+			},
+		});
+	exit;
+}
+
+if(defined($hide)) {
+	if ($ARGV[0]) {
+		system "attrib.exe +h +s +r $ARGV[0]";
+	} else {
+		system 'attrib.exe +h +s +r //S //D';
+	}
+}
+
+if(defined($show)) {
+	if ($ARGV[0]) {
+		system "attrib.exe -h -s -r $ARGV[0]";
+	} else {
+		system 'attrib.exe -h -s -r //S //D';
+		system 'aattr -hi desktop.ini';
+	}
+}
