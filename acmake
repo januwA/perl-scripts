@@ -1,0 +1,106 @@
+#!/usr/bin/perl
+
+# cmake脚本
+
+use v5.10;
+use strict;
+use utf8;
+use autodie;
+use warnings;
+use Encode qw(decode encode);
+use Data::Dumper qw(Dumper);
+use Getopt::Long qw(GetOptions);
+use Term::ANSIColor;
+use File::Basename;
+use Cwd qw(abs_path);
+use lib dirname (abs_path(__FILE__));
+
+use PrintHelp;
+
+my ($help, $init);
+
+GetOptions (
+	"init" 	=> \$init,
+	"help" 	=> \$help,
+);
+
+if(defined($help)){
+	PrintHelp->new([
+			'acmake -h',
+			'acmake -init',
+		],
+		{
+			init => {
+				msg 	=> "初始化最基本的 CMakeLists.txt 和 build.bat",
+			},
+		});
+	exit;
+}
+
+if(defined($init)) {
+	my $CMakeLists =  <<"CMakeLists";
+cmake_minimum_required(VERSION 3.0)
+
+project(test VERSION 0.0.1)
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+
+add_executable(test main.cpp)
+
+CMakeLists
+
+	my $build_bat =  <<"build_bat";
+CALL cmake -S ./ -B ./build
+CALL cmake --build ./build/ --config Debug
+CALL .\\build\\Debug\\test.exe
+
+build_bat
+
+	my $build_sh =  <<"build_sh";
+#!/bin/bash
+
+if ! command -v cmake &>/dev/null
+then
+  sudo apt-get update
+  sudo apt install cmake -y
+fi
+
+if ! command -v g++ &>/dev/null
+then
+  sudo apt-get update
+  sudo apt install g++ -y
+fi
+
+cmake -S ./ -B ./build
+cmake --build ./build/ --config Debug
+./build/test
+
+build_sh
+
+	my $main =  <<"main";
+#include <iostream>
+
+int main(int argc, char *argv[])
+{
+	printf("hello world\\n");
+    return 0;
+}
+
+main
+
+	my $fh;
+	open($fh, ">", "CMakeLists.txt");
+	print $fh encode('utf-8', $CMakeLists);
+	
+	open($fh, ">", "build.bat");
+	print $fh encode('utf-8', $build_bat);
+
+	open($fh, ">", "build.sh");
+	print $fh encode('utf-8', $build_sh);
+
+	open($fh, ">", "main.cpp");
+	print $fh encode('utf-8', $main);
+	
+	close($fh);
+}
