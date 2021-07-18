@@ -23,34 +23,34 @@ $saveDir =~ s/\p{space}/\\ /g; # 避免windows上的空格文件
 
 my $packageJson = <<'t';
 {
-  "name": "babel-macro",
-  "version": "0.1.0",
-  "description": "",
-  "main": "src/index.js",
-  "scripts": {
-    "build": "./node_modules/.bin/babel src --out-dir dist"
-  },
-  "keywords": [
-    "Ajanuw",
-    "babel-plugin-macros"
-  ],
-  "author": "Ajanuw",
-  "license": "MIT",
-  "devDependencies": {
-    "@babel/cli": "^7.8.4",
-    "@babel/core": "^7.8.4",
-    "@babel/plugin-proposal-class-properties": "^7.8.3",
-    "@babel/preset-env": "^7.8.4",
-    "babel-plugin-macros": "^2.8.0"
-  }
+	"name": "babel-macro",
+	"version": "0.1.0",
+	"description": "",
+	"main": "src/index.js",
+	"scripts": {
+		"build": "./node_modules/.bin/babel src --out-dir dist"
+	},
+	"keywords": [
+		"Ajanuw",
+		"babel-plugin-macros"
+	],
+	"author": "Ajanuw",
+	"license": "MIT",
+	"devDependencies": {
+		"@babel/cli": "^7.8.4",
+		"@babel/core": "^7.8.4",
+		"@babel/plugin-proposal-class-properties": "^7.8.3",
+		"@babel/preset-env": "^7.8.4",
+		"babel-plugin-macros": "^2.8.0"
+	}
 }
 
 t
 
 my $babelConfigJs = <<'t';
 module.exports = {
-  presets: ["@babel/preset-env"],
-  plugins: ["macros"]
+	presets: ["@babel/preset-env"],
+	plugins: ["macros"]
 };
 
 t
@@ -177,15 +177,15 @@ my $srcMyMacro = <<'t';
 const { createMacro } = require("babel-plugin-macros");
 
 module.exports = createMacro(function myMacro({ references, state, babel }) {
-  const { types: t, traverse, parse } = babel;
+		const { types: t, traverse, parse } = babel;
 
-  references.default.forEach(path => {
-    const parentPath = path.parentPath;
-    if (parentPath.type === "TaggedTemplateExpression") {
-      parentPath.replaceWith(t.stringLiteral("ajanuw"));
-    }
-  });
-});
+		references.default.forEach(path => {
+				const parentPath = path.parentPath;
+				if (parentPath.type === "TaggedTemplateExpression") {
+					parentPath.replaceWith(t.stringLiteral("ajanuw"));
+				}
+			});
+	});
 
 t
 

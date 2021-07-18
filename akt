@@ -14,18 +14,18 @@ use File::Spec::Functions qw(catfile); # join path
 my $ktFile = shift @ARGV;
 
 if(!defined($ktFile)){
-  exit;
+	exit;
 }
 $ktFile =~ s/\p{space}/\\ /g; # 避免windows上的空格文件
 my ($name, $dir, $suffix) = fileparse($ktFile, qr/\.[^.]*/);
 
 # 只对.kt文件作出反应
 if($suffix eq '.kt'){
-  my $dPath = catfile($dir, "$name.jar");
-  system "kotlinc $ktFile -include-runtime -d $dPath";
-  system "java -jar $dPath";
+	my $dPath = catfile($dir, "$name.jar");
+	system "kotlinc $ktFile -include-runtime -d $dPath";
+	system "java -jar $dPath";
 
-  # 执行完删除.jar文件
-  unlink($dPath) or die "delete $$dPath error.";
+	# 执行完删除.jar文件
+	unlink($dPath) or die "delete $$dPath error.";
 }
 

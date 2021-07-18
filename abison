@@ -16,7 +16,7 @@ use File::Spec::Functions qw(catfile); # join path
 my $saveDir = shift @ARGV;
 
 unless(defined($saveDir)) {
-  exit;
+	exit;
 }
 
 $saveDir =~ s/\p{space}/\\ /g; # 避免windows上的空格文件
@@ -30,23 +30,23 @@ my $flexTmp = <<'flex';
 %option outfile="lexer.cpp"
 
 %{
-#include <iostream>
-#include "parser.h"
+	#include <iostream>
+	#include "parser.h"
 
-xxs::location loc;
-std::string str_buf;
+	xxs::location loc;
+	std::string str_buf;
 
-#define YY_DECL yy::parser::symbol_type yylex()
-#define yyterminate() return yy::parser::make_YYEOF(loc)
-#define _T(t)  return xxs::parser::make_##t(loc)
-#define _IT(t) return xxs::parser::make_##t(std::stoll(yytext), loc)
-#define _FT(t) return xxs::parser::make_##t(std::stod(yytext), loc)
-#define _ST(t) return xxs::parser::make_##t(std::string(yytext, yyleng), loc)
-#define _STR   return xxs::parser::make_STRING(str_buf, loc)
+	#define YY_DECL yy::parser::symbol_type yylex()
+	#define yyterminate() return yy::parser::make_YYEOF(loc)
+	#define _T(t)  return xxs::parser::make_##t(loc)
+	#define _IT(t) return xxs::parser::make_##t(std::stoll(yytext), loc)
+	#define _FT(t) return xxs::parser::make_##t(std::stod(yytext), loc)
+	#define _ST(t) return xxs::parser::make_##t(std::string(yytext, yyleng), loc)
+	#define _STR   return xxs::parser::make_STRING(str_buf, loc)
 
-#define YY_USER_ACTION loc.step(); loc.columns(yyleng);
+	#define YY_USER_ACTION loc.step(); loc.columns(yyleng);
 
-%}
+	%}
 
 INT     [0-9]+
 FLOAT   [0-9]*\.[0-9]+
@@ -147,13 +147,13 @@ my $bisonTmp = <<'bison';
 */
 
 %code requires {
-  #include <memory>
-  #include <format>
+	#include <memory>
+	#include <format>
 }
 
 %code {
-  #include <iostream>
-  extern yy::parser::symbol_type yylex();
+	#include <iostream>
+	extern yy::parser::symbol_type yylex();
 }
 
 %token FUNCTION "function" IF "if" FOR "for" ELSE "else"  WHILE "while"
@@ -187,32 +187,32 @@ main:
 
 void yy::parser::error(const location_type& loc, const std::string& msg)
 {
-  std::cout << msg << "\n";
+	std::cout << msg << "\n";
 }
 
 bison
 
 # 目录不存在，则创建
 unless(-e $saveDir){
-  mkdir($saveDir);
+	mkdir($saveDir);
 }
 
 if(-d $saveDir){
-  # 拼接目录和文件名
-  my $flexTmpPath = catfile($saveDir, 'lexer.l');
-  my $bisonTmpPath = catfile($saveDir, 'parser.y');
+	# 拼接目录和文件名
+	my $flexTmpPath = catfile($saveDir, 'lexer.l');
+	my $bisonTmpPath = catfile($saveDir, 'parser.y');
 
-  # 创建文件，并写入内容(强制覆盖)
-  my $fh;
-  open($fh, ">", $flexTmpPath) or die "open file error: $flexTmpPath!";
-  print $fh encode('utf-8', $flexTmp);
+	# 创建文件，并写入内容(强制覆盖)
+	my $fh;
+	open($fh, ">", $flexTmpPath) or die "open file error: $flexTmpPath!";
+	print $fh encode('utf-8', $flexTmp);
 
-  open($fh, ">", $bisonTmpPath) or die "open file error: $bisonTmpPath!";
-  print $fh encode('utf-8', $bisonTmp);
+	open($fh, ">", $bisonTmpPath) or die "open file error: $bisonTmpPath!";
+	print $fh encode('utf-8', $bisonTmp);
 
-  close $fh or warn "Close failed.";
+	close $fh or warn "Close failed.";
 }else{
-  die "Command line error.\n";
+	die "Command line error.\n";
 }
 
 

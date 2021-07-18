@@ -27,89 +27,89 @@ my $build; # build apk
 my $proxyPort = 19996;
 
 GetOptions (
-  "proxy-port=i" => \$proxyPort,
-  "reset"        => \$reset,
-  "publish"      => \$publish,
-  "help"         => \$help,
-  "check"        => \$check,
-  "codegen"      => \$codegen,
-  "build"        => \$build,
+	"proxy-port=i" => \$proxyPort,
+	"reset"        => \$reset,
+	"publish"      => \$publish,
+	"help"         => \$help,
+	"check"        => \$check,
+	"codegen"      => \$codegen,
+	"build"        => \$build,
 );
 
 if(defined($help)){
-    PrintHelp->new([
-      "afpp -h"
-    ],
-    {
-  	publish => {
-      msg => "发布包命令",
-      alias => "pub",
-  	},
-  	reset => {
-      msg => "设置china的安装包环境",
-      alias => "r",
-  	},
-    check => {
-      msg => "检查包是否有错误",
-      alias => "c",
-  	},
-    "proxy-port" => {
-      msg => "发布时设置本地代理代理端口号",
-      alias => "proxy",
-      default => 19996,
-  	},
-    "codegen" => {
-      msg => "生成*.g.dart文件",
-  	},
-    "build" => {
-      msg => "分包打包APK",
-      alias => "b",
-  	},
-    help => {
-      msg => "帮助文档.",
-      alias => "h",
-    }
-  });
-  exit;
+	PrintHelp->new([
+			"afpp -h"
+		],
+		{
+			publish => {
+				msg => "发布包命令",
+				alias => "pub",
+			},
+			reset => {
+				msg => "设置china的安装包环境",
+				alias => "r",
+			},
+			check => {
+				msg => "检查包是否有错误",
+				alias => "c",
+			},
+			"proxy-port" => {
+				msg => "发布时设置本地代理代理端口号",
+				alias => "proxy",
+				default => 19996,
+			},
+			"codegen" => {
+				msg => "生成*.g.dart文件",
+			},
+			"build" => {
+				msg => "分包打包APK",
+				alias => "b",
+			},
+			help => {
+				msg => "帮助文档.",
+				alias => "h",
+			}
+		});
+	exit;
 }
 
 if(defined($check)){
-  system 'flutter packages pub lish --dry-run';
-  exit;
+	system 'flutter packages pub lish --dry-run';
+	exit;
 }
 
 if(defined($build)) {
-  system 'flutter build apk --split-per-abi';
-  exit;
+	system 'flutter build apk --split-per-abi';
+	exit;
 }
 
 sub resetENV {
-  delete $ENV{'http_proxy'};
-  delete $ENV{'https_proxy'};
-  $ENV{'PUB_HOSTED_URL'} = "https://pub.flutter-io.cn";
-  $ENV{'FLUTTER_STORAGE_BASE_URL'} = "https://storage.flutter-io.cn";
+	delete $ENV{'http_proxy'};
+	delete $ENV{'https_proxy'};
+	$ENV{'PUB_HOSTED_URL'} = "https://pub.flutter-io.cn";
+	$ENV{'FLUTTER_STORAGE_BASE_URL'} = "https://storage.flutter-io.cn";
 }
 
 sub publishENV {
-  delete $ENV{'PUB_HOSTED_URL'};
-  delete $ENV{'FLUTTER_STORAGE_BASE_URL'};
-  $ENV{'http_proxy'} = "http://127.0.0.1:$proxyPort";
-  $ENV{'https_proxy'} = "https://127.0.0.1:$proxyPort";
+	delete $ENV{'PUB_HOSTED_URL'};
+	delete $ENV{'FLUTTER_STORAGE_BASE_URL'};
+	$ENV{'http_proxy'} = "http://127.0.0.1:$proxyPort";
+	$ENV{'https_proxy'} = "https://127.0.0.1:$proxyPort";
 }
 
 # 发布：设置环境变量，并执行发布命令
 if(defined($publish)){
-  publishENV();
-  system 'flutter packages pub lish';
-  resetENV();
+	publishENV();
+	system 'flutter packages pub lish';
+	resetENV();
 }
 
 # 发布成功，重置环境变量
 if(defined($reset)){
-  resetENV();
+	resetENV();
 }
 
 if(defined($codegen)){
-  system 'flutter packages pub run build_runner watch --delete-conflicting-outputs';
+	system 'flutter packages pub run build_runner watch --delete-conflicting-outputs';
 }
 

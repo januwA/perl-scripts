@@ -25,44 +25,44 @@ my $help;
 my $ignores;
 
 GetOptions (
-  "depath=i" => \$depath,
-  "ignores=s" => \$ignores,
-  "help"     => \$help
+	"depath=i" => \$depath,
+	"ignores=s" => \$ignores,
+	"help"     => \$help
 );
 
 if(defined($help)){
-  PrintHelp->new([
-      "atree [dir=./] [options]",
-      "atree ./lib",
-      "atree ./lib --depath 1",
-      "or",
-      "atree ./lib -d 1",
-      "atree -i ~/.atree -d 3"
-    ],
-    {
-  	ignores => {
-      msg => "无视目录配置文件路径.",
-      alias => "i",
-      default => "./atree"
-  	},
-  	depath => {
-      msg => "查询目录深度.",
-      alias => "d",
-      default => '0 无限.'
-  	},
-    help => {
-      msg => "帮助文档.",
-      alias => "h",
-    }
-  });
-  exit;
+	PrintHelp->new([
+			"atree [dir=./] [options]",
+			"atree ./lib",
+			"atree ./lib --depath 1",
+			"or",
+			"atree ./lib -d 1",
+			"atree -i ~/.atree -d 3"
+		],
+		{
+			ignores => {
+				msg => "无视目录配置文件路径.",
+				alias => "i",
+				default => "./atree"
+			},
+			depath => {
+				msg => "查询目录深度.",
+				alias => "d",
+				default => '0 无限.'
+			},
+			help => {
+				msg => "帮助文档.",
+				alias => "h",
+			}
+		});
+	exit;
 }
 
 my $dirPath = $ARGV[0] // "./";
 unless(-d -e $dirPath){
-  print color("red");
-  say encode('utf-8', "$dirPath 不是目录，或则不存在!!");
-  exit;
+	print color("red");
+	say encode('utf-8', "$dirPath 不是目录，或则不存在!!");
+	exit;
 }
 
 my $ignoresFileName = ".atree";
@@ -73,42 +73,42 @@ my @ignores = ();
 
 # 读取忽略文件
 sub readIgnores {
-  if(defined($ignoresPath) && -e $ignoresPath){
-    my $fh;
-    open $fh, "<", $ignoresPath;
-    while(<$fh>){
-      chomp;
-      $_ =~ s/^\s+|\s+$//g;
-      next if /^#/;
-      push @ignores, $_;
-    }
-    close $fh;
-  }
+	if(defined($ignoresPath) && -e $ignoresPath){
+		my $fh;
+		open $fh, "<", $ignoresPath;
+		while(<$fh>){
+			chomp;
+			$_ =~ s/^\s+|\s+$//g;
+			next if /^#/;
+			push @ignores, $_;
+		}
+		close $fh;
+	}
 }
 readIgnores();
 
 sub scan {
-  my ($dir, $dep, $depathCount) = @_;
-  if($dir && -d -e $dir) {
-    my @files = <$dir/* $dir/.[!.]*>;
-    $depathCount++;
-    for(@files){
-      # next if /\.{1,2}$/g;
-      my $p = catfile($_);
-      if(-d $p){
-        my($filename) = fileparse($p);
-        unless($filename ~~ @ignores){
-          say "$dep$filename/";
-          if($depath eq 0 or $depathCount lt $depath){
-            scan($p, "|   ".$dep."", $depathCount);
-          }
-        }
-      }else { 
-        my($filename) = fileparse($p);
-        say "$dep$filename";
-      }
-    }
-  };
+	my ($dir, $dep, $depathCount) = @_;
+	if($dir && -d -e $dir) {
+		my @files = <$dir/* $dir/.[!.]*>;
+		$depathCount++;
+		for(@files){
+			# next if /\.{1,2}$/g;
+			my $p = catfile($_);
+			if(-d $p){
+				my($filename) = fileparse($p);
+				unless($filename ~~ @ignores){
+					say "$dep$filename/";
+					if($depath eq 0 or $depathCount lt $depath){
+						scan($p, "|   ".$dep."", $depathCount);
+					}
+				}
+			}else { 
+				my($filename) = fileparse($p);
+				say "$dep$filename";
+			}
+		}
+	};
 }
 
 scan($dirPath, "|-- ", 0);

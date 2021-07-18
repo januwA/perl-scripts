@@ -15,7 +15,7 @@ use File::Spec::Functions qw(catfile); # join path
 my $saveDir = shift @ARGV;
 
 unless(defined($saveDir)){
-  exit;
+	exit;
 }
 
 $saveDir =~ s/\p{space}/\\ /g; # 避免windows上的空格文件
@@ -45,8 +45,8 @@ html
 
 my $jsTmp = <<'js';
 function setup() {
-  createCanvas(600, 400);
-  background(0);
+	createCanvas(600, 400);
+	background(0);
 }
 
 function draw() {
@@ -57,25 +57,25 @@ js
 
 # 目录不存在，则创建
 unless(-e $saveDir){
-  mkdir($saveDir);
+	mkdir($saveDir);
 }
 
 if(-d $saveDir){
-  # 拼接目录和文件名
-  my $htmlPath = catfile($saveDir, 'index.html');
-  my $jsPath = catfile($saveDir, 'sketch.js');
+	# 拼接目录和文件名
+	my $htmlPath = catfile($saveDir, 'index.html');
+	my $jsPath = catfile($saveDir, 'sketch.js');
 
-  # 创建文件，并写入内容(强制覆盖)
-  my $fh;
-  open($fh, ">", $htmlPath) or die "open file error: $htmlPath!";
-  print $fh encode('utf-8', $htmlTmp);
+	# 创建文件，并写入内容(强制覆盖)
+	my $fh;
+	open($fh, ">", $htmlPath) or die "open file error: $htmlPath!";
+	print $fh encode('utf-8', $htmlTmp);
 
-  open($fh, ">", $jsPath) or die "open file error: $jsPath!";
-  print $fh encode('utf-8', $jsTmp);
+	open($fh, ">", $jsPath) or die "open file error: $jsPath!";
+	print $fh encode('utf-8', $jsTmp);
 
-  close $fh or warn "Close failed.";
+	close $fh or warn "Close failed.";
 }else{
-  die "Command line error.\n";
+	die "Command line error.\n";
 }
 
 

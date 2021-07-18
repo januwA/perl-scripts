@@ -17,16 +17,16 @@ my $year = strftime "%Y", localtime;
 my $help;
 
 GetOptions (
-  "name=s" => \$name,
-  "year=i" => \$year,
-  "help" => \$help,
-  ) or die("Error in command line arguments\n");
+	"name=s" => \$name,
+	"year=i" => \$year,
+	"help" => \$help,
+);
 
 if(defined($help)){
-print encode 'utf-8', <<"help"; 
- 添加一个MIT开源协议文件
-  --year    set copyright year, default [$year]
-  --name    set 版权持有人, default [$name]
+	print encode 'utf-8', <<"help"; 
+添加一个MIT开源协议文件
+--year    set copyright year, default [$year]
+--name    set 版权持有人, default [$name]
 help
 }
 

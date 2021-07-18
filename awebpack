@@ -23,8 +23,8 @@ use File::Path qw(remove_tree); # 递归删除目录
 my ($saveDir) = @ARGV;
 
 if(!defined($saveDir)){
-  say encode 'utf8', '必须设置保存目录.';
-  exit;
+	say encode 'utf8', '必须设置保存目录.';
+	exit;
 }
 
 $saveDir =~ s/\p{space}/\\ /g; # 避免windows上的空格文件
@@ -37,11 +37,11 @@ remove_tree($gitDir);
 
 my $msg = <<'data';
 
-    See also:
+See also:
 
-      # https://webpack.js.org/
-      # https://www.webpackjs.com/
-      # https://github.com/januwA/webpack-scaffold.git
+# https://webpack.js.org/
+# https://www.webpackjs.com/
+# https://github.com/januwA/webpack-scaffold.git
 
 data
 
