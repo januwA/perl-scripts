@@ -21,13 +21,7 @@ use PrintHelp;
 my $registry_taobao = "https://registry.npm.taobao.org/";
 my $registry_npm = "https://registry.npmjs.org/";
 
-my $publish;
-my $taobao;
-my $npm;
-my $help;
-my $update;
-my $registry;
-my $global;
+my ($help, $publish, $taobao, $npm, $update, $registry, $global, $list);
 
 # 如果运行脚本，一个参数都没有传入，则打印help文档
 GetOptions (
@@ -36,8 +30,9 @@ GetOptions (
 	"taobao"   => \$taobao,
 	"help"   => \$help,
 	"update"   => \$update,
-  "registry"  => \$registry,
-	"global" => \$global
+	"registry"  => \$registry,
+	"global" => \$global,
+	"list" => \$list
 );
 
 if(defined($help)){
@@ -64,14 +59,18 @@ if(defined($help)){
 				msg => "升级package.json的依赖包",
 				alias => "u"
 			},
-      registry => {
+			registry => {
 				msg => "查看当前源",
 				alias => "r"
-      },
-      global => {
+			},
+			global => {
 				msg => "global -g",
 				alias => "g"
-      },
+			},
+			list => {
+				msg => "npm list --depth=0",
+				alias => "l"
+			},
 			help => {
 				msg => "帮助文档.",
 				alias => "h",
@@ -81,7 +80,7 @@ if(defined($help)){
 }
 
 sub show_registry {
-  system 'npm config get registry';
+	system 'npm config get registry';
 }
 
 # 发布后立即切换回taobao源
@@ -93,22 +92,22 @@ if(defined($publish)){
 
 if(defined($npm)){
 	system 'npm config set registry '.$registry_npm;
-  show_registry();
+	show_registry();
 }
 
 if(defined($taobao)){
 	system 'npm config set registry '.$registry_taobao;
-  show_registry();
+	show_registry();
 }
 
-if(defined($update) and defined($global)){
-	# 更新全局包
-	system 'npx npm-check-updates -g';
-} elsif(defined($update)) {
-	# 更新当前项目包
-	system 'npx npm-check-updates -u && npm i';
+if(defined($update)){
+	system defined($global) ? 'npx npm-check-updates -g' : 'npx npm-check-updates -u && npm i';
+}
+
+if(defined($list)){
+	system defined($global) ? 'npm -g list --depth=0' : 'npm list --depth=0';
 }
 
 if(defined($registry)){
-  show_registry();
+	show_registry();
 }
