@@ -42,16 +42,13 @@ if(defined($help)){
 		{
 			ignores => {
 				msg => "无视目录的配置文件路径",
-				alias => "i"
 			},
 			depath => {
 				msg => "查询目录深度",
-				alias => "d",
 				default => '0 无限'
 			},
 			help => {
 				msg => "帮助文档",
-				alias => "h",
 			}
 		});
 	exit;

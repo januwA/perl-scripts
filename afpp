@@ -43,19 +43,15 @@ if(defined($help)){
 		{
 			publish => {
 				msg => "发布包命令",
-				alias => "pub",
 			},
 			reset => {
 				msg => "设置china的安装包环境",
-				alias => "r",
 			},
 			check => {
 				msg => "检查包是否有错误",
-				alias => "c",
 			},
 			"proxy-port" => {
 				msg => "发布时设置本地代理代理端口号",
-				alias => "proxy",
 				default => 19996,
 			},
 			"codegen" => {
@@ -63,11 +59,9 @@ if(defined($help)){
 			},
 			"build" => {
 				msg => "分包打包APK",
-				alias => "b",
 			},
 			help => {
 				msg => "帮助文档.",
-				alias => "h",
 			}
 		});
 	exit;

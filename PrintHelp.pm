@@ -2,48 +2,6 @@
 
 # 打印help文档
 
-# Usage
-#
-# PrintHelp->new([
-#     "atree [dir=./] [options]",
-#     "atree ./lib",
-#     "atree ./lib --depath 1",
-#     "or",
-#     "atree ./lib -d 1",
-#     "atree -i ~/.atree -d 3"
-#   ],
-#   {
-# 	ignores => {
-#     msg => "无视目录配置文件路径.",
-#     alias => "i",
-#     default => "./atree"
-# 	},
-# 	depath => {
-#     msg => "查询目录深度.",
-#     alias => "d",
-#     default => '0 无限.'
-# 	},
-#   help => {
-#     msg => "帮助文档.",
-#     alias => "h",
-#   }
-# });
-
-
-# Demo
-#
-# Usage: atree [dir=./] [options]
-#        atree ./lib
-#        atree ./lib --depath 1
-#        or
-#        atree ./lib -d 1
-#        atree -i ~/.atree -d 3
-
-# Options:
-#   -d, --depath  查询目录深度. (default: 0 无限.)
-#   -i, --ignores 无视目录配置文件路径. (default: ./atree)
-#   -h, --help    帮助文档.
-
 package PrintHelp;
 require Exporter;
 
@@ -77,7 +35,6 @@ sub getMaxLen {
    my $maxLen = 0;
    my $opts = $self->{options};
    for(keys %{$opts}) {
-      $_ .= "-$opts->{$_}{\"alias\"}, " if(defined($opts->{$_}{"alias"}));
       $maxLen = length($_) if(length($_) > $maxLen);
    }
    return $maxLen;
@@ -104,23 +61,42 @@ sub setOptions {
    my( $self ) = @_;
    my $help = "";
    my $opts = $self->{options};
-   if(defined($opts)){
-      my $maxLen = $self->getMaxLen();
-      # say $maxLen;
-      $help .= "Options:\n";
-      for(keys %{$opts}) {
-        my $keyLen = length($_);
-        $help .= "  ";
-        $help .= "-$opts->{$_}{\"alias\"}, " if(defined($opts->{$_}{"alias"}));
-        $help .= "--$_";
-        $help .= "  " unless(defined($opts->{$_}{"alias"}));
-        $help .= " " x ($maxLen - $keyLen) if($keyLen < $maxLen);
-        $help .= "\t$opts->{$_}{\"msg\"}" if(defined($opts->{$_}{"msg"}));
-        $help .= " (default: $opts->{$_}{\"default\"})" if(defined($opts->{$_}{"default"}));
-        $help .= "\n";
-      };
-   }
+   unless( defined($opts)) { return $help; }
+   my $maxLen = $self->getMaxLen();
+   $help .= "Options:\n";
+
+   for my $key (sort keys %{$opts}) {
+      my $value = $opts->{$key};
+      my $keyLen = length($key); # key 长度
+      my $alias = $self->getAlias($key); # 默认取key第一个字符作为alias
+      $help .= "  ";
+      $help .= "-$alias\t";
+      $help .= "--$key";
+      $help .= " " x ($maxLen - $keyLen) if($keyLen < $maxLen);
+      $help .= "\t$value->{msg}" if(defined($value->{msg}));
+      $help .= " (default: $value->{default})" if(defined($value->{default}));
+      $help .= "\n";
+   };
+
    return $help;
+}
+
+# 从key中提起唯一的alias
+sub getAlias {
+   state @aliasCacke = ();
+
+   my( $self, $key ) = @_;
+
+   # alias 长度默认1，如果存在alias则加一
+   my $aliasLen = 1;
+   my $alias = substr($key, 0, $aliasLen);
+
+   while($alias ~~ @aliasCacke) {
+      $alias = substr($key, 0, ++$aliasLen);
+   }
+
+   push(@aliasCacke, $alias);
+   return $alias;
 }
 
 our @ISA = qw(Exporter); # 继承Exporter

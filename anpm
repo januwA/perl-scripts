@@ -36,51 +36,42 @@ GetOptions (
 );
 
 if(defined($help)){
-	PrintHelp->new([
-			"anpm -h",
-			"anpm -tao",
-		],
+	PrintHelp->new([ "anpm -h" ],
 		{
 			publish => {
 				msg => "发布npm包，将自动切换到npm源，发布成功后在自动切回taobao源",
-				alias => "p",
 			},
 			taobao => {
 				msg => "设置淘宝源",
-				alias => "t",
 				default => $registry_taobao
 			},
 			npm => {
 				msg => "设置默认源",
-				alias => "n",
 				default => $registry_npm
 			},
 			update => {
 				msg => "升级package.json的依赖包",
-				alias => "u"
 			},
 			registry => {
 				msg => "查看当前源",
-				alias => "r"
 			},
 			global => {
 				msg => "global -g",
-				alias => "g"
 			},
 			list => {
 				msg => "npm list --depth=0",
-				alias => "l"
 			},
 			help => {
 				msg => "帮助文档.",
-				alias => "h",
 			}
-		});
+		}
+		
+		);
 	exit;
 }
 
 sub show_registry {
-	system 'npm config get registry';
+system 'npm config get registry';
 }
 
 # 发布后立即切换回taobao源

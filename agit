@@ -40,37 +40,30 @@ if(defined($help)){
 		{
 			amend => {
 				msg 	=> "修改最新的提交",
-				alias 	=> "a",
 				default => "git add . && git commit --amend --no-edit && git push -f"
 			},
 			togit => {
 				msg 	=> "把本地htps仓库转化为git仓库",
-				alias 	=> "t",
 				default => "git remote set-url origin <仓库地址>"
 			},
 			push => {
 				msg 	=> "提交到远程仓库",
-				alias 	=> "p",
 				default => 'git add . && git commit -m "<message>" && git push'
 			},
 			restore => {
 				msg 	=> "恢复工作树的修改",
-				alias 	=> "re",
 				default => 'git restore .'
 			},
 			del => {
 				msg 	=> "删除本地分支",
-				alias 	=> "d",
 				default => 'git branch -d dev'
 			},
 			new => {
 				msg 	=> "创建本地分支",
-				alias 	=> "n",
 				default => 'git checkout -b dev'
 			},
 			in => {
 				msg 	=> "切换分支",
-				alias 	=> "i",
 				default => 'git checkout dev'
 			},
 		});
