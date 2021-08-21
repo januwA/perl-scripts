@@ -18,7 +18,7 @@ use lib dirname (abs_path(__FILE__));
 
 use PrintHelp;
 
-my ($help, $amend, $togit, $push, $restore, $del, $new, $in);
+my ($help, $amend, $togit, $push, $restore, $del, $new, $in, $commit, $merge);
 
 GetOptions (
 	"amend" 	=> \$amend,
@@ -29,6 +29,8 @@ GetOptions (
 	"del"		=> \$del,
 	"new"		=> \$new,
 	"in"		=> \$in,
+	"commit"	=> \$commit,
+	"merge"		=> \$merge,
 );
 
 if(defined($help)){
@@ -65,6 +67,14 @@ if(defined($help)){
 			in => {
 				msg 	=> "切换分支",
 				default => 'git checkout dev'
+			},
+			commit => {
+				msg 	=> "保存所有本地所有变更，然后commit",
+				default => 'git add . && git commit'
+			},
+			merge => {
+				msg 	=> "合并本地分支",
+				default => 'git merge dev'
 			},
 		});
 	exit;
@@ -107,4 +117,13 @@ if(defined($del)) {
 if(defined($in)) {
 	my $name = $ARGV[0] // 'dev';
 	system "git checkout $name";
+}
+
+if(defined($merge)) {
+	my $name = $ARGV[0] // 'dev';
+	system "git merge $name";
+}
+
+if(defined($commit)) {
+	system "git add . && git commit";
 }
