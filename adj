@@ -1,0 +1,118 @@
+#!/usr/bin/perl
+
+# django 快速脚本
+
+use v5.10;
+use strict;
+use utf8;
+use autodie;
+use warnings;
+use Encode qw(decode encode);
+use Data::Dumper qw(Dumper);
+use Getopt::Long qw(GetOptions);
+use Term::ANSIColor;
+use File::Basename;
+use File::Path qw(make_path);
+use Cwd qw(abs_path);
+use lib dirname (abs_path(__FILE__));
+
+use PrintHelp;
+
+my ($help, $start, $m1, $m2, $new, $admin, $shell, $init);
+
+GetOptions (
+	"help" 	=> \$help,
+	"start" => \$start,
+	"m1" 	=> \$m1,
+	"m2" 	=> \$m2,
+	"new" 	=> \$new,
+	"admin" => \$admin,
+	"shell" => \$shell,
+	"init" => \$init,
+);
+
+if(defined($help)){
+	PrintHelp->new([
+			'adj -h',
+			'adj -start',
+		],
+		{
+			start => {
+				msg 	=> "启动本地开发服务器",
+				default => "python manage.py runserver"
+			},
+			m1 => {
+				msg 	=> "生成迁移文件",
+				default => "python manage.py makemigrations"
+			},
+			m2 => {
+				msg 	=> "执行迁移",
+				default => "python manage.py migrate"
+			},
+			new => {
+				msg 	=> "创建一个新模块",
+				default => "python manage.py startapp <app name>"
+			},
+			admin => {
+				msg 	=> "创建一个管理员",
+				default => "python manage.py createsuperuser"
+			},
+			shell => {
+				msg 	=> "开启django shell",
+				default => "python manage.py shell"
+			},
+			init => {
+				msg 	=> "初始化 django 项目",
+				default => "adj -init <project name>"
+			},
+		});
+	exit;
+}
+
+
+if(defined($init)) {
+	if($ARGV[0]){
+		my $pro_dir = $ARGV[0] . "_project";
+		make_path($pro_dir);
+		chdir $pro_dir;
+		system "pipenv install django djangorestframework";
+		system "pipenv shell";
+		system "django-admin startproject $ARGV[0] .";
+
+		print color('green');
+		print encode('utf-8', "\n创建完成 \n");
+		print encode('utf-8', "cd $pro_dir \n\n");
+	}else {
+		print color('red');
+		print encode('utf-8', "请输入项目名称 \n");
+	}
+}
+
+if(defined($start)) {
+	system "python manage.py runserver";
+}
+
+if(defined($m1)) {
+	system "python manage.py makemigrations";
+}
+
+if(defined($m2)) {
+	system "python manage.py migrate";
+}
+
+if(defined($new)) {
+	if($ARGV[0]) {
+		system "python manage.py startapp $ARGV[0]";
+	} else {
+		print color('red');
+		print encode('utf-8', "请输入模块名 \n");
+	}
+}
+
+if(defined($admin)){
+	system "python manage.py createsuperuser"
+}
+
+if(defined($shell)){
+	system "python manage.py shell"
+}
